@@ -1,10 +1,17 @@
 package ph.edu.dlsu.lbycpei.lbycpd2_p1.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a single payroll record with Philippine statutory deductions.
- * Deductions follow SSS, PhilHealth, Pag-IBIG, and BIR withholding tax guidelines.
+ *
+ * This class also keeps track of manual overrides (hours, rate, individual
+ * deduction components) and paid leave entries. All calculations are derived
+ * from the current state of the record so the original CSV source stays
+ * untouched.
  */
 public class PayrollRecord {
 
@@ -16,11 +23,24 @@ public class PayrollRecord {
     private LocalDate payPeriodStart;
     private LocalDate payPeriodEnd;
 
-    // Deductions (computed)
+    // Additional attributes parsed from CSV where available
+    private String department;
+
+    // Paid leave entries (each contains its own hours)
+    private final List<PaidLeaveEntry> paidLeaveEntries = new ArrayList<>();
+
+    // Deductions (computed, but may be overridden manually)
     private double sssDeduction;
     private double philhealthDeduction;
     private double pagibigDeduction;
     private double taxDeduction;
+
+    // Manual override flags -- if true, the corresponding deduction value
+    // is treated as fixed and will not be recomputed automatically.
+    private boolean sssOverridden;
+    private boolean philhealthOverridden;
+    private boolean pagibigOverridden;
+    private boolean taxOverridden;
 
     public PayrollRecord(String employeeId, String name, double hoursWorked, double hourlyRate) {
         this(employeeId, name, null, hoursWorked, hourlyRate, null, null);
@@ -32,29 +52,130 @@ public class PayrollRecord {
         this.employeeId = employeeId;
         this.name = name;
         this.client = client != null ? client.trim() : "";
-        this.hoursWorked = hoursWorked;
-        this.hourlyRate = hourlyRate;
+        this.hoursWorked = Math.max(0, hoursWorked);
+        this.hourlyRate = Math.max(0, hourlyRate);
         this.payPeriodStart = payPeriodStart;
         this.payPeriodEnd = payPeriodEnd;
         computeDeductions();
     }
 
     public String getEmployeeId() { return employeeId; }
+    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+
     public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
     public String getClient() { return client != null ? client : ""; }
+    public void setClient(String client) { this.client = client; }
+
+    public String getDepartment() { return department != null ? department : ""; }
+    public void setDepartment(String department) { this.department = department; }
+
     public double getHoursWorked() { return hoursWorked; }
+
+    /**
+     * Sets the base worked hours (excluding paid leave). Negative values are
+     * rejected to avoid unrealistic input.
+     */
+    public void setHoursWorked(double hoursWorked) {
+        if (hoursWorked < 0) {
+            throw new IllegalArgumentException("Hours worked must not be negative");
+        }
+        this.hoursWorked = hoursWorked;
+        computeDeductions();
+    }
+
     public double getHourlyRate() { return hourlyRate; }
+
+    /**
+     * Sets the hourly rate. Negative values are rejected.
+     */
+    public void setHourlyRate(double hourlyRate) {
+        if (hourlyRate < 0) {
+            throw new IllegalArgumentException("Hourly rate must not be negative");
+        }
+        this.hourlyRate = hourlyRate;
+        computeDeductions();
+    }
+
     public LocalDate getPayPeriodStart() { return payPeriodStart; }
+    public void setPayPeriodStart(LocalDate payPeriodStart) {
+        this.payPeriodStart = payPeriodStart;
+        computeDeductions();
+    }
+
     public LocalDate getPayPeriodEnd() { return payPeriodEnd; }
+    public void setPayPeriodEnd(LocalDate payPeriodEnd) {
+        this.payPeriodEnd = payPeriodEnd;
+        computeDeductions();
+    }
+
+    /**
+     * Total paid-leave hours added to base worked hours when computing gross
+     * pay. Paid leave is never treated as an absence.
+     */
+    public double getPaidLeaveHours() {
+        return paidLeaveEntries.stream().mapToDouble(PaidLeaveEntry::getHours).sum();
+    }
+
+    /**
+     * Returns an unmodifiable view of the paid-leave entries for display.
+     */
+    public List<PaidLeaveEntry> getPaidLeaveEntries() {
+        return Collections.unmodifiableList(paidLeaveEntries);
+    }
+
+    public void addPaidLeaveEntry(PaidLeaveEntry entry) {
+        if (entry == null) return;
+        paidLeaveEntries.add(entry);
+        computeDeductions();
+    }
+
+    public void removePaidLeaveEntry(PaidLeaveEntry entry) {
+        if (entry == null) return;
+        paidLeaveEntries.remove(entry);
+        computeDeductions();
+    }
+
+    /**
+     * Effective hours used for gross pay computation, including paid leave.
+     */
+    public double getEffectiveHours() {
+        return hoursWorked + getPaidLeaveHours();
+    }
 
     public double getGrossPay() {
-        return Math.round(hoursWorked * hourlyRate * 100.0) / 100.0;
+        return Math.round(getEffectiveHours() * hourlyRate * 100.0) / 100.0;
     }
 
     public double getSssDeduction() { return sssDeduction; }
     public double getPhilhealthDeduction() { return philhealthDeduction; }
     public double getPagibigDeduction() { return pagibigDeduction; }
     public double getTaxDeduction() { return taxDeduction; }
+
+    public void overrideSssDeduction(double value) {
+        if (value < 0) throw new IllegalArgumentException("SSS deduction must not be negative");
+        this.sssDeduction = value;
+        this.sssOverridden = true;
+    }
+
+    public void overridePhilhealthDeduction(double value) {
+        if (value < 0) throw new IllegalArgumentException("PhilHealth deduction must not be negative");
+        this.philhealthDeduction = value;
+        this.philhealthOverridden = true;
+    }
+
+    public void overridePagibigDeduction(double value) {
+        if (value < 0) throw new IllegalArgumentException("Pag-IBIG deduction must not be negative");
+        this.pagibigDeduction = value;
+        this.pagibigOverridden = true;
+    }
+
+    public void overrideTaxDeduction(double value) {
+        if (value < 0) throw new IllegalArgumentException("Tax deduction must not be negative");
+        this.taxDeduction = value;
+        this.taxOverridden = true;
+    }
 
     public double getTotalDeductions() {
         return Math.round((sssDeduction + philhealthDeduction + pagibigDeduction + taxDeduction) * 100.0) / 100.0;
@@ -65,10 +186,10 @@ public class PayrollRecord {
     }
 
     /**
-     * Philippine statutory deductions (simplified tiered/contribution rules).
-     * SSS: based on salary brackets; PhilHealth: 4% with floor/ceiling; Pag-IBIG: 1–2% with cap; Tax: graduated.
+     * Recomputes statutory deductions based on the current effective hours and
+     * hourly rate, unless a particular component has been manually overridden.
      */
-    private void computeDeductions() {
+    public void computeDeductions() {
         double gross = getGrossPay();
         // Use monthly equivalent for contribution tables (assume 2 pays per month if not set)
         double monthlyGross;
@@ -80,12 +201,23 @@ public class PayrollRecord {
         }
 
         if (monthlyGross <= 0) {
-            sssDeduction = philhealthDeduction = pagibigDeduction = taxDeduction = 0;
+            if (!sssOverridden) sssDeduction = 0;
+            if (!philhealthOverridden) philhealthDeduction = 0;
+            if (!pagibigOverridden) pagibigDeduction = 0;
+            if (!taxOverridden) taxDeduction = 0;
         } else {
-            sssDeduction = computeSSS(monthlyGross, gross);
-            philhealthDeduction = computePhilHealth(monthlyGross, gross);
-            pagibigDeduction = computePagIbig(monthlyGross, gross);
-            taxDeduction = computeWithholdingTax(monthlyGross, gross);
+            if (!sssOverridden) {
+                sssDeduction = computeSSS(monthlyGross, gross);
+            }
+            if (!philhealthOverridden) {
+                philhealthDeduction = computePhilHealth(monthlyGross, gross);
+            }
+            if (!pagibigOverridden) {
+                pagibigDeduction = computePagIbig(monthlyGross, gross);
+            }
+            if (!taxOverridden) {
+                taxDeduction = computeWithholdingTax(monthlyGross, gross);
+            }
         }
 
         sssDeduction = Math.round(sssDeduction * 100.0) / 100.0;
@@ -137,3 +269,4 @@ public class PayrollRecord {
         return (grossThisPay / monthlyGross) * monthlyTax;
     }
 }
+

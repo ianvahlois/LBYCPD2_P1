@@ -96,7 +96,7 @@ public class CSVReader {
 
             String id = safeTrim(cols, 0);
             String name = safeTrim(cols, 1);
-            String dept = safeTrim(cols, 2);
+            String dept = safeTrim(cols, 2);   // mapped as department
 
             if (id.isBlank() || !id.matches("\\d+")) continue;
 
@@ -106,10 +106,10 @@ public class CSVReader {
             // absences column = index 12 → values like 4.0, 16.0
             double absenceDays = ParseUtils.parseDouble(safeTrim(cols, 12), 0);
 
-            // deduct 8 hours per absence day
+            // deduct 8 hours per absence day (unpaid absences)
             double adjustedHours = Math.max(0, hours - (absenceDays * 8));
 
-            records.add(new PayrollRecord(
+            PayrollRecord record = new PayrollRecord(
                     id,
                     name,
                     dept,
@@ -117,7 +117,11 @@ public class CSVReader {
                     defaultHourlyRate,
                     periodStart,
                     periodEnd
-            ));
+            );
+            // Also expose the department in the dedicated field so the GUI
+            // can filter/group by it.
+            record.setDepartment(dept);
+            records.add(record);
         }
 
         return records;
