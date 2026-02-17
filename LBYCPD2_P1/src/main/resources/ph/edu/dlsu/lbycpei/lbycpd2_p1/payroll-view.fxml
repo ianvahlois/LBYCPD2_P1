@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="12" alignment="CENTER"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ph.edu.dlsu.lbycpei.lbycpd2_p1.controller.PayrollController">
+
+    <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Button text="Load Payroll CSV" onAction="#loadCSV"/>
+        <Button text="Generate Receipts" onAction="#generateReceipts"/>
+        <Button text="Export Payroll CSV" onAction="#exportPayroll"/>
+    </HBox>
+
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <Label text="Company name (for receipts):"/>
+        <TextField fx:id="companyNameField" promptText="Company Name" prefWidth="220"/>
+        <Label text="Default hourly rate (attendance report):"/>
+        <TextField fx:id="defaultRateField" promptText="e.g. 100" prefWidth="80"/>
+    </HBox>
+
+    <Label fx:id="summaryLabel" text="No payroll data loaded." wrapText="true" maxWidth="Infinity"/>
+
+    <TableView fx:id="table" VBox.vgrow="ALWAYS" minHeight="200">
+        <columns>
+            <TableColumn text="Employee ID" fx:id="idCol" minWidth="90" prefWidth="100"/>
+            <TableColumn text="Name" fx:id="nameCol" minWidth="140" prefWidth="180"/>
+            <TableColumn text="Client" fx:id="clientCol" minWidth="120" prefWidth="140"/>
+            <TableColumn text="Hours" fx:id="hoursCol" minWidth="60" prefWidth="70"/>
+            <TableColumn text="Rate" fx:id="rateCol" minWidth="70" prefWidth="80"/>
+            <TableColumn text="Gross Pay" fx:id="grossCol" minWidth="90" prefWidth="100"/>
+            <TableColumn text="SSS" fx:id="sssCol" minWidth="70" prefWidth="80"/>
+            <TableColumn text="PhilHealth" fx:id="philhealthCol" minWidth="85" prefWidth="95"/>
+            <TableColumn text="Pag-IBIG" fx:id="pagibigCol" minWidth="75" prefWidth="85"/>
+            <TableColumn text="Tax" fx:id="taxCol" minWidth="70" prefWidth="80"/>
+            <TableColumn text="Net Pay" fx:id="netCol" minWidth="90" prefWidth="100"/>
+        </columns>
+    </TableView>
+</VBox>
