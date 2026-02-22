@@ -4,21 +4,23 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="12" alignment="CENTER"
-      xmlns="http://javafx.com/javafx"
+<VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ph.edu.dlsu.lbycpei.lbycpd2_p1.controller.LoginController">
+      fx:controller="ph.edu.dlsu.lbycpei.lbycpd2_p1.controller.LoginController"
+      alignment="CENTER"
+      styleClass="login-panel"
+      stylesheets="@app.css">
 
-    <padding><Insets top="16" right="20" bottom="16" left="20"/></padding>
+    <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
 
-    <Label text="Payroll System Login" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <Label text="Payroll System Login" styleClass="login-title"/>
 
-    <VBox spacing="8" fillWidth="true">
-        <HBox spacing="8" alignment="CENTER_LEFT">
+    <VBox spacing="10" style=" -fx-padding: 16 0 8 0;">
+        <HBox spacing="10" alignment="CENTER_LEFT">
             <Label text="Username:" minWidth="80"/>
-            <TextField fx:id="usernameField" promptText="admin" prefWidth="220"/>
+            <TextField fx:id="usernameField" promptText="Username" prefWidth="220"/>
         </HBox>
-        <HBox spacing="8" alignment="CENTER_LEFT">
+        <HBox spacing="10" alignment="CENTER_LEFT">
             <Label text="Password:" minWidth="80"/>
             <PasswordField fx:id="passwordField" promptText="••••••••" prefWidth="220"/>
         </HBox>
@@ -28,10 +30,12 @@
             text="Login"
             defaultButton="true"
             onAction="#handleLogin"
-            prefWidth="120"/>
+            prefWidth="140"
+            styleClass="btn-primary"/>
 
-    <Label text="Hint: default account is admin / admin123"
-           style="-fx-font-size: 11px; -fx-text-fill: #666666;"/>
+    <Label text="Sign in to access payroll."
+           styleClass="login-hint"
+           style="-fx-padding: 8 0 0 0;"/>
 
 </VBox>
 

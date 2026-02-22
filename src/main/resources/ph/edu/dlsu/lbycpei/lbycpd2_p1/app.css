@@ -1,0 +1,125 @@
+/* Payroll System - Application styles (Philippine payroll theme) */
+
+/* ----- Base ----- */
+.root {
+    -fx-font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f5f6fa;
+}
+
+/* ----- Toolbar ----- */
+.toolbar-panel {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* ----- Buttons ----- */
+.button {
+    -fx-background-radius: 6;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+}
+.button:hover {
+    -fx-opacity: 0.9;
+}
+.button:pressed {
+    -fx-opacity: 0.85;
+}
+
+.btn-primary {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+}
+.btn-primary:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.btn-action {
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+}
+.btn-action:hover {
+    -fx-background-color: #047857;
+}
+
+/* ----- Text fields ----- */
+.text-field {
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-border-color: #d1d5db;
+    -fx-padding: 6 10;
+    -fx-font-size: 12px;
+}
+.text-field:focused {
+    -fx-border-color: #2563eb;
+    -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.2), 4, 0, 0, 0);
+}
+
+/* ----- Labels ----- */
+.label {
+    -fx-text-fill: #374151;
+}
+
+/* ----- Table ----- */
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e5e7eb;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+.table-view .column-header {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e5e7eb;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 8;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+.table-view .table-row-cell:odd {
+    -fx-background-color: #fafafa;
+}
+.table-view .table-row-cell:selected {
+    -fx-background-color: #dbeafe;
+}
+.table-view .table-cell {
+    -fx-padding: 8 10;
+    -fx-font-size: 12px;
+}
+.table-view .table-column {
+    -fx-alignment: CENTER-LEFT;
+}
+/* Right-align numeric columns (Rate, Gross, SSS, etc.) */
+.table-column.number-col .table-cell {
+    -fx-alignment: CENTER-RIGHT;
+}
+
+/* ----- Dashboard (bottom summary) ----- */
+.dashboard-panel {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1 0 0 0;
+}
+.dashboard-value {
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1f2937;
+}
+
+/* ----- Login screen ----- */
+.login-panel {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-padding: 24;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.08), 12, 0, 0, 2);
+}
+.login-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+}
+.login-hint {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+}

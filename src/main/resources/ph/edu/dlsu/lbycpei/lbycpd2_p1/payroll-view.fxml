@@ -6,19 +6,21 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ph.edu.dlsu.lbycpei.lbycpd2_p1.controller.PayrollController">
+            fx:controller="ph.edu.dlsu.lbycpei.lbycpd2_p1.controller.PayrollController"
+            stylesheets="@app.css">
 
     <top>
-        <VBox spacing="8">
+        <VBox spacing="8" styleClass="toolbar-panel">
             <padding><Insets top="10" right="12" bottom="8" left="12"/></padding>
 
             <HBox spacing="8" alignment="CENTER_LEFT">
-                <Button text="Load Payroll CSV" onAction="#loadCSV"/>
-                <Button text="Generate Receipts" onAction="#generateReceipts"/>
-                <Button text="Export Encrypted Payroll" onAction="#exportPayroll"/>
+                <Button text="Load CSV" onAction="#loadCSV" styleClass="btn-primary"/>
+                <Button text="Add Employee" onAction="#addEmployee" styleClass="btn-action"/>
                 <Button text="Edit Selected" onAction="#editSelectedEmployee"/>
                 <Button text="Add Paid Leave" onAction="#addPaidLeave"/>
                 <Button text="Remove Paid Leave" onAction="#removePaidLeave"/>
+                <Button text="Generate Receipts" onAction="#generateReceipts"/>
+                <Button text="Export" onAction="#exportPayroll"/>
             </HBox>
 
             <HBox spacing="8" alignment="CENTER_LEFT">
@@ -56,19 +58,19 @@
     </center>
 
     <bottom>
-        <VBox spacing="6">
-            <padding><Insets top="6" right="12" bottom="10" left="12"/></padding>
+        <VBox spacing="6" styleClass="dashboard-panel">
+            <padding><Insets top="10" right="12" bottom="12" left="12"/></padding>
             <Label fx:id="summaryLabel" text="No payroll data loaded." wrapText="true" maxWidth="Infinity"/>
 
-            <HBox spacing="16" alignment="CENTER_LEFT">
+            <HBox spacing="20" alignment="CENTER_LEFT">
                 <Label text="Total Employees:"/>
-                <Label fx:id="totalEmployeesLabel" text="0" style="-fx-font-weight: bold;"/>
+                <Label fx:id="totalEmployeesLabel" text="0" styleClass="dashboard-value"/>
                 <Label text="Total Gross:"/>
-                <Label fx:id="totalGrossLabel" text="Php 0.00" style="-fx-font-weight: bold;"/>
+                <Label fx:id="totalGrossLabel" text="Php 0.00" styleClass="dashboard-value"/>
                 <Label text="Total Deductions:"/>
-                <Label fx:id="totalDeductionsLabel" text="Php 0.00" style="-fx-font-weight: bold;"/>
+                <Label fx:id="totalDeductionsLabel" text="Php 0.00" styleClass="dashboard-value"/>
                 <Label text="Total Net:"/>
-                <Label fx:id="totalNetLabel" text="Php 0.00" style="-fx-font-weight: bold;"/>
+                <Label fx:id="totalNetLabel" text="Php 0.00" styleClass="dashboard-value"/>
             </HBox>
         </VBox>
     </bottom>

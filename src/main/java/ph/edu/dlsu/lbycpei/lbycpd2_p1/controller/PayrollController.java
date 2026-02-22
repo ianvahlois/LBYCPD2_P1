@@ -172,6 +172,75 @@ public class PayrollController {
         if (totalNetLabel != null) totalNetLabel.setText(String.format("Php %,.2f", totalNet));
     }
 
+    /** Adds a new employee via dialog; validates and audit-logs. */
+    @FXML
+    private void addEmployee() {
+        ensureAuthenticated();
+        Dialog<PayrollRecord> dialog = new Dialog<>();
+        dialog.setTitle("Add Employee");
+        dialog.setHeaderText("Enter new employee details");
+
+        TextField idField = new TextField();
+        idField.setPromptText("Employee ID");
+        TextField nameField = new TextField();
+        nameField.setPromptText("Full name");
+        TextField deptField = new TextField();
+        deptField.setPromptText("Department / Client");
+        TextField hoursField = new TextField();
+        hoursField.setPromptText("Hours worked (e.g. 160)");
+        TextField rateField = new TextField();
+        rateField.setPromptText("Hourly rate (e.g. 100)");
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(8);
+        grid.add(new Label("Employee ID:"), 0, 0);
+        grid.add(idField, 1, 0);
+        grid.add(new Label("Name:"), 0, 1);
+        grid.add(nameField, 1, 1);
+        grid.add(new Label("Department / Client:"), 0, 2);
+        grid.add(deptField, 1, 2);
+        grid.add(new Label("Hours worked:"), 0, 3);
+        grid.add(hoursField, 1, 3);
+        grid.add(new Label("Hourly rate (Php):"), 0, 4);
+        grid.add(rateField, 1, 4);
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        double defaultRate = 100.0;
+        if (defaultRateField != null && defaultRateField.getText() != null && !defaultRateField.getText().isBlank()) {
+            double r = ParseUtils.parseDouble(defaultRateField.getText().trim(), -1);
+            if (r >= 0) defaultRate = r;
+        }
+        final double rateDefault = defaultRate;
+
+        dialog.setResultConverter(btn -> {
+            if (btn != ButtonType.OK) return null;
+            String id = idField.getText() != null ? idField.getText().trim() : "";
+            String name = nameField.getText() != null ? nameField.getText().trim() : "";
+            if (id.isEmpty() || name.isEmpty()) {
+                showAlert(Alert.AlertType.ERROR, "Invalid input", "Employee ID and Name are required.");
+                return null;
+            }
+            double hours = ParseUtils.parseDouble(hoursField.getText(), -1);
+            double rate = ParseUtils.parseDouble(rateField.getText(), -1);
+            if (hours < 0) hours = 0;
+            if (rate < 0) rate = rateDefault;
+            String client = deptField.getText() != null ? deptField.getText().trim() : "";
+            PayrollRecord rec = new PayrollRecord(id, name, client, hours, rate, null, null);
+            rec.setDepartment(client);
+            return rec;
+        });
+
+        Optional<PayrollRecord> result = dialog.showAndWait();
+        result.ifPresent(rec -> {
+            backingList.add(rec);
+            AuditLogger.logFieldChange(rec.getEmployeeId(), "ADD_EMPLOYEE", null, rec.getName());
+            table.refresh();
+            updateSummary();
+        });
+    }
+
     @FXML
     private void loadCSV() {
         ensureAuthenticated();

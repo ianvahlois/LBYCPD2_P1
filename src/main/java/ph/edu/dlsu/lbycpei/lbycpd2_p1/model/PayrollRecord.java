@@ -226,22 +226,21 @@ public class PayrollRecord {
         taxDeduction = Math.round(taxDeduction * 100.0) / 100.0;
     }
 
-    /** SSS employee share: tiered by monthly salary credit (simplified brackets). */
+    /** SSS: employee share per MSC brackets (SSS Circulars). Simplified: 4.5% of MSC, MSC clamped to 4,250–99,750. */
     private double computeSSS(double monthlyGross, double grossThisPay) {
         double msc = Math.min(Math.max(monthlyGross, 4_250), 99_750);
-        // Employee share is approximately 4.5% of MSC, prorated to this pay period
         double monthlyContribution = msc * 0.045;
         return (grossThisPay / monthlyGross) * monthlyContribution;
     }
 
-    /** PhilHealth: 4% of basic salary, min 200 / max 5,000 per month (prorated). */
+    /** PhilHealth: 4% of basic salary, min ₱200 / max ₱5,000 monthly premium (UHC Law). Prorated to pay period. */
     private double computePhilHealth(double monthlyGross, double grossThisPay) {
         double monthlyPremium = monthlyGross * 0.04;
         monthlyPremium = Math.max(200, Math.min(5_000, monthlyPremium));
         return (grossThisPay / monthlyGross) * monthlyPremium;
     }
 
-    /** Pag-IBIG: 1% if monthly <= 1,500, else 2%, capped at 5,000 monthly salary. */
+    /** Pag-IBIG: 1% if monthly compensation ≤ ₱1,500, else 2%; max contributable salary ₱5,000 (Pag-IBIG rules). */
     private double computePagIbig(double monthlyGross, double grossThisPay) {
         double rate = monthlyGross <= 1_500 ? 0.01 : 0.02;
         double contributable = Math.min(monthlyGross, 5_000);
@@ -249,23 +248,28 @@ public class PayrollRecord {
         return (grossThisPay / monthlyGross) * monthlyContribution;
     }
 
-    /** Withholding tax on compensation (graduated TRAIN rates, simplified). */
+    /**
+     * Withholding tax on compensation per TRAIN Law (RA 10963), BIR tables.
+     * Annual brackets: ≤250k exempt; 250k–400k 15%; 400k–800k 22.5k+20%;
+     * 800k–2M 102.5k+25%; 2M–8M 402.5k+30%; above 8M 2,202.5k+35%.
+     */
     private double computeWithholdingTax(double monthlyGross, double grossThisPay) {
         double annual = monthlyGross * 12;
-        double monthlyTax;
+        double annualTax;
         if (annual <= 250_000) {
-            monthlyTax = 0;
+            annualTax = 0;
         } else if (annual <= 400_000) {
-            monthlyTax = ((annual - 250_000) * 0.20) / 12;
+            annualTax = (annual - 250_000) * 0.15;
         } else if (annual <= 800_000) {
-            monthlyTax = (30_000 + (annual - 400_000) * 0.25) / 12;
+            annualTax = 22_500 + (annual - 400_000) * 0.20;
         } else if (annual <= 2_000_000) {
-            monthlyTax = (130_000 + (annual - 800_000) * 0.30) / 12;
+            annualTax = 102_500 + (annual - 800_000) * 0.25;
         } else if (annual <= 8_000_000) {
-            monthlyTax = (490_000 + (annual - 2_000_000) * 0.32) / 12;
+            annualTax = 402_500 + (annual - 2_000_000) * 0.30;
         } else {
-            monthlyTax = (2_410_000 + (annual - 8_000_000) * 0.35) / 12;
+            annualTax = 2_202_500 + (annual - 8_000_000) * 0.35;
         }
+        double monthlyTax = annualTax / 12;
         return (grossThisPay / monthlyGross) * monthlyTax;
     }
 }
