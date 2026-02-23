@@ -1,0 +1,7 @@
+Attendance summary,,,,,,,,,,,,,,,,,,,,,,,,,
+Date,2025-02-01 ~ 2025-02-15,,,,,,,,,,,,,,,,,,,,,,,,,
+ID,Name,Dept.,Working hours,,Late,,Early,,Overtime,,Attend(Standard/Actual),Absences,Leave,Business trip,Additional wage,,,Reduced wage,,,Real Pay,Remark,,,
+,,,Standard,Actual,Frequency,Min,Frequency,Min,Normal,Special,,,,,Tagging,OT,Allowance,Late/Early,Casual leave,Deduction,,,,,
+101,Juan Dela Cruz,Operations,128:00,00:00,0,0,0,0,00:00,00:00,16/16,0.0,0.0,0.0,,,,,,,,,,,
+102,Maria Santos,IT,120:00,00:00,2,30,1,15,00:00,00:00,15/14,1.0,0.0,0.0,,,,,,,,,,,
+103,Pedro Reyes,HR,128:00,00:00,0,0,0,0,00:00,00:00,16/16,0.0,8.0,0.0,,,,,,,,,,,

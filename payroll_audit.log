@@ -1,3 +1,4 @@
 2026-02-18 00:52:55 [admin] FIELD_CHANGE employeeId=1 field=hourlyRate old=100.0 new=520.0
 2026-02-18 00:53:06 [admin] FIELD_CHANGE employeeId=3 field=hourlyRate old=100.0 new=400.0
 2026-02-18 00:53:29 [admin] PAID_LEAVE employeeId=3 action=ADD details=2026-01-23 to 2026-01-30 (56.00 h)
+2026-02-23 18:09:42 [admin] FIELD_CHANGE employeeId=3 field=hourlyRate old=100.0 new=200.0

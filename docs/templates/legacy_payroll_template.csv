@@ -1,0 +1,4 @@
+employeeId,name,hoursWorked,hourlyRate,client
+EMP001,Juan Dela Cruz,160,100,Operations
+EMP002,Maria Santos,152,120,IT
+EMP003,Pedro Reyes,160,100,HR
