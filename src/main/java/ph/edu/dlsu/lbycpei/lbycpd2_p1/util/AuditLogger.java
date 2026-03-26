@@ -44,6 +44,17 @@ public final class AuditLogger {
         writeLine(user, msg);
     }
 
+    /**
+     * Logs import/processing summaries (e.g., counts of ignored day entries).
+     * This is informational and meant to support auditing/troubleshooting.
+     */
+    public static void logImportSummary(String action, String details) {
+        String user = SessionContext.getCurrentUsername();
+        String msg = String.format("IMPORT_SUMMARY action=%s details=%s",
+                safe(action), safe(details));
+        writeLine(user, msg);
+    }
+
     private static String safe(Object v) {
         return v == null ? "" : v.toString().replace('\n', ' ').replace('\r', ' ');
     }

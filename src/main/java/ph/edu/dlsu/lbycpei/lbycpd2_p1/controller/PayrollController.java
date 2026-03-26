@@ -13,17 +13,17 @@ import ph.edu.dlsu.lbycpei.lbycpd2_p1.model.PayrollRecord;
 import ph.edu.dlsu.lbycpei.lbycpd2_p1.security.SessionContext;
 import ph.edu.dlsu.lbycpei.lbycpd2_p1.util.AuditLogger;
 import ph.edu.dlsu.lbycpei.lbycpd2_p1.util.CSVReader;
-import ph.edu.dlsu.lbycpei.lbycpd2_p1.util.CryptoUtils;
+import ph.edu.dlsu.lbycpei.lbycpd2_p1.util.ExcelImportResult;
+import ph.edu.dlsu.lbycpei.lbycpd2_p1.util.ExcelReader;
 import ph.edu.dlsu.lbycpei.lbycpd2_p1.util.ParseUtils;
 import ph.edu.dlsu.lbycpei.lbycpd2_p1.util.PayrollExport;
 import ph.edu.dlsu.lbycpei.lbycpd2_p1.util.ReceiptGenerator;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class PayrollController {
@@ -245,9 +245,12 @@ public class PayrollController {
     private void loadCSV() {
         ensureAuthenticated();
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Select Payroll CSV File");
+        fileChooser.setTitle("Select Payroll File (CSV or Excel)");
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv")
+        );
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Excel files (*.xlsx, *.xls)", "*.xlsx", "*.xls")
         );
         File selectedFile = fileChooser.showOpenDialog(table.getScene().getWindow());
         if (selectedFile != null) {
@@ -256,9 +259,36 @@ public class PayrollController {
                 double r = ParseUtils.parseDouble(defaultRateField.getText().trim(), -1);
                 if (r >= 0) rate = r;
             }
-            List<PayrollRecord> data = CSVReader.readCSV(selectedFile.getAbsolutePath(), rate);
-            backingList.setAll(data);
-            updateSummary();
+
+            String lowerName = selectedFile.getName().toLowerCase(Locale.ROOT);
+            try {
+                if (lowerName.endsWith(".xlsx") || lowerName.endsWith(".xls")) {
+                    ExcelImportResult result = ExcelReader.readExcel(selectedFile.getAbsolutePath(), rate);
+                    backingList.setAll(result.getRecords());
+                    updateSummary();
+
+                    int ignoredMissingTime = result.getStats().getIgnoredDueToMissingTimeInOrTimeOut();
+                    Path dumpPath = result.getRawDumpCsvPath();
+
+                    AuditLogger.logImportSummary("EXCEL_IMPORT",
+                            "file=" + selectedFile.getName()
+                                    + " employees=" + result.getStats().getEmployeeCount()
+                                    + " parsedDayRows=" + result.getStats().getDayRowsParsed()
+                                    + " ignoredMissingTimeInOrTimeOut=" + ignoredMissingTime
+                                    + " rawDumpCsv=" + (dumpPath != null ? dumpPath.toString() : ""));
+
+                    showAlert(Alert.AlertType.INFORMATION, "Import Summary",
+                            "Employees loaded: " + result.getStats().getEmployeeCount()
+                                    + "\nIgnored day entries (missing Time In/Time Out): " + ignoredMissingTime
+                                    + "\nFull CSV dump saved to: " + (dumpPath != null ? dumpPath.toString() : "—"));
+                } else {
+                    List<PayrollRecord> data = CSVReader.readCSV(selectedFile.getAbsolutePath(), rate);
+                    backingList.setAll(data);
+                    updateSummary();
+                }
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Import failed", e.getMessage());
+            }
         }
     }
 
@@ -292,24 +322,14 @@ public class PayrollController {
             return;
         }
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Save Encrypted Payroll CSV");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Encrypted files (*.enc)", "*.enc"));
-        chooser.setInitialFileName("payroll_export.enc");
+        chooser.setTitle("Save Payroll CSV");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files (*.csv)", "*.csv"));
+        chooser.setInitialFileName("payroll_export.csv");
         File file = chooser.showSaveDialog(table.getScene().getWindow());
         if (file == null) return;
         try {
-            // Export clear CSV into a string (never saved unencrypted to disk)
-            Path temp = Files.createTempFile("payroll_export_", ".csv");
-            try {
-                PayrollExport.exportToCsv(backingList, temp);
-                String csvContent = Files.readString(temp, StandardCharsets.UTF_8);
-                char[] encPassword = SessionContext.getEncryptionPassword();
-                byte[] encrypted = CryptoUtils.encryptToBytes(csvContent, encPassword);
-                Files.write(file.toPath(), encrypted);
-            } finally {
-                Files.deleteIfExists(temp);
-            }
-            showAlert(Alert.AlertType.INFORMATION, "Export Done", "Encrypted payroll saved to " + file.getAbsolutePath());
+            PayrollExport.exportToCsv(backingList, file.toPath());
+            showAlert(Alert.AlertType.INFORMATION, "Export Done", "Payroll CSV saved to " + file.getAbsolutePath());
         } catch (Exception e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Export failed: " + e.getMessage());
         }

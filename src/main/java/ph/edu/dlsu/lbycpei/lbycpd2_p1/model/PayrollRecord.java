@@ -26,6 +26,10 @@ public class PayrollRecord {
     // Additional attributes parsed from CSV where available
     private String department;
 
+    // Import quality flags (primarily used by Excel/biometric per-day exports)
+    private boolean missingDataFlag;
+    private int ignoredDaysDueToMissingTimeInOut;
+
     // Paid leave entries (each contains its own hours)
     private final List<PaidLeaveEntry> paidLeaveEntries = new ArrayList<>();
 
@@ -70,6 +74,26 @@ public class PayrollRecord {
 
     public String getDepartment() { return department != null ? department : ""; }
     public void setDepartment(String department) { this.department = department; }
+
+    /**
+     * True if this record came from an import that contained missing time punches
+     * (e.g., missing Time In or Time Out for one or more days).
+     */
+    public boolean isMissingDataFlag() { return missingDataFlag; }
+
+    public void setMissingDataFlag(boolean missingDataFlag) {
+        this.missingDataFlag = missingDataFlag;
+    }
+
+    /**
+     * Number of per-day entries ignored during import because either Time In or
+     * Time Out was missing/blank.
+     */
+    public int getIgnoredDaysDueToMissingTimeInOut() { return ignoredDaysDueToMissingTimeInOut; }
+
+    public void setIgnoredDaysDueToMissingTimeInOut(int ignoredDaysDueToMissingTimeInOut) {
+        this.ignoredDaysDueToMissingTimeInOut = Math.max(0, ignoredDaysDueToMissingTimeInOut);
+    }
 
     public double getHoursWorked() { return hoursWorked; }
 

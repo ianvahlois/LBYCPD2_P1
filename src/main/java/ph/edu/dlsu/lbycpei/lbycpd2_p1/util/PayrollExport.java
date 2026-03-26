@@ -17,7 +17,7 @@ public class PayrollExport {
         if (records == null) return;
         Files.createDirectories(file.getParent());
         try (BufferedWriter w = Files.newBufferedWriter(file)) {
-            w.write("Employee ID,Name,Client,Hours Worked,Hourly Rate,Gross Pay,SSS,PhilHealth,Pag-IBIG,Withholding Tax,Total Deductions,Net Pay");
+            w.write("Employee ID,Name,Client,Hours Worked,Hourly Rate,Gross Pay,SSS,PhilHealth,Pag-IBIG,Withholding Tax,Total Deductions,Net Pay,Missing Data Flag,Ignored Days (Missing Time In/Out)");
             w.newLine();
             for (PayrollRecord r : records) {
                 w.write(csvEscape(r.getEmployeeId()) + ",");
@@ -27,6 +27,10 @@ public class PayrollExport {
                         r.getHoursWorked(), r.getHourlyRate(), r.getGrossPay(),
                         r.getSssDeduction(), r.getPhilhealthDeduction(), r.getPagibigDeduction(),
                         r.getTaxDeduction(), r.getTotalDeductions(), r.getNetPay()));
+                w.write(",");
+                w.write(r.isMissingDataFlag() ? "TRUE" : "FALSE");
+                w.write(",");
+                w.write(String.valueOf(r.getIgnoredDaysDueToMissingTimeInOut()));
                 w.newLine();
             }
         }

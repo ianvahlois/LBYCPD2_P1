@@ -1,6 +1,8 @@
 module ph.edu.dlsu.lbycpei.lbycpd2_p1 {
     requires javafx.controls;
     requires javafx.fxml;
+    requires org.apache.poi.poi;
+    requires org.apache.poi.ooxml;
 
     opens ph.edu.dlsu.lbycpei.lbycpd2_p1.controller to javafx.fxml;
     opens ph.edu.dlsu.lbycpei.lbycpd2_p1.model to javafx.base;
